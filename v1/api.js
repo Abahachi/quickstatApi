@@ -1,5 +1,9 @@
-var util = require('util');
-var restify = require('restify');
+var util        = require('util');
+var restify     = require('restify');
+var mysql       = require('mysql');
+var config      = require('./config.js')
+var pool        = mysql.createPool(config.mysql);
+var operations  = require('./operations.js')(pool);
 
 rest = restify.createServer({
     name: 'QuickStat'
@@ -18,7 +22,7 @@ rest.use(function(req, res, next) {
             res.header('WWW-Authenticate', 'Basic realm="Please login"');
             return res.send(401);
 
-            console.log('login:' + auth.basic.username);
+            console.log('login:'    + auth.basic.username);
             console.log('password:' + auth.basic.password);
             //check if right log+pass.
             //Return if not
@@ -36,34 +40,59 @@ rest.get('/', function (req, res){
 rest.get('/v1/sites', function (req, res){
 
     //MySQL parsing
-    res.send(200, {result: "Sites_OK"});
+    operations.listSites(function (err, response){
+        if(err) {
+            res.send(404, {result: "Sites not found"});
+        }
+        res.send(200, {result: response});
+    });
 });
 
 rest.get('/v1/persons', function (req, res){
-
-    //MySQL parsing
-    res.send(200, {result: "Pers_OK"});
+    operations.listPersons(function (err, response){
+        if(err) {
+            res.send(404, {result: "Persons not found"});
+        }
+        res.send(200, {result: response});
+    });
 });
 
+/*
+ 1. Запросить общую статистику для всех персон по сайту:
+ /v1/stats?site_id=1
 
-///v1/stats/1?site_id=1&first_date=01.08.2016&last_date=05.08.2016
+ [
+ {"id":1, "name":"Путин", "rank":23},
+ {"id":2, "name":"Медведев", "rank":18},
+ {"id":3, "name":"Навальный", "rank":10}
+ ]
+*/
 rest.get('/v1/stats', function (req, res){
-
-    //MySQL parsing
-    if (req.query.first_date && req.query.last_date) {
-        res.send(200, {result: "Sites_OK", first_date: req.query.first_date, last_date:req.query.last_date });
-    }
-    res.send(200, {result: "Sites_OK", body: req.query });
+    operations.listRanksBySiteId(req.query.site_id, function (err, response)
+    {
+        if (err) {
+            res.send(404, {result: "Ranks not found"});
+        }
+        res.send(200, {result: response});
+    });
 });
 
 rest.get('/v1/stats/:id', function (req, res){
-
-    //MySQL parsing
-    if (req.query.first_date && req.query.last_date) {
-        res.send(200, {result: "Sites_OK", id: req.params.id, first_date: req.query.first_date, last_date:req.query.last_date });
+    if (req.query.first_date && req.query.last_date)
+    {
+        operations.findPageStatFromTo(req.params.id, req.query.site_id, req.query.first_date, req.query.last_date,
+            function (err, response) {
+                if (err) {
+                    res.send(404, {result: "Ranks not found"});
+                }
+                res.send(200, {result: response});
+            }
+        );
+    } else {
+        res.send(404, {result: "problem occured"});
     }
-    res.send(200, {result: "Sites_OK", body: req.query });
 });
+
 
 
 rest.listen(8080, function(){
