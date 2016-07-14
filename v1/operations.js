@@ -1,23 +1,51 @@
+var sqlServer = "1gb.ru";
+if(sqlServer == "1gb.ru"){
+    var _sites          = "test2_sites";
+    var _siteId         = "site_id"; //SiteID
+    var _persons        = "test_persons";
+    var _personId       = "Person_id"; //PersonID
+    var _pages          = "test2_pages";
+    var _pageId         = "page_id"; //
+    var _personPageRank = "test_person_page_rank";
+    var _foundDate      = "added"; //FoundDate
+}
+if(sqlServer == "localhost"){
+    var _sites          = "sites";
+    var _siteId         = "SiteID";
+    var _persons        = "persons";
+    var _personId       = "PersonID";
+    var _pages          = "pages";
+    var _pageId         = "pageID";
+    var _personPageRank = "personPageRank";
+    var _foundDate      = "FoundDate";
+  }
+
+
 var operations = function (pool) {
     return {
         listSites: function (callback) {
-            pool.query('SELECT * FROM sites', callback);
+            //console.log("listSites");
+            pool.query('SELECT * FROM ' + _sites, callback);
         },
         listPersons: function (callback) {
-            pool.query('SELECT * FROM persons', callback);
+            //console.log("listPersons");
+            pool.query('SELECT * FROM ' + _persons, callback);
         },
         listPersonsById: function (PersonId, callback) {
-            pool.query('SELECT * FROM persons WHERE ID = ?', PersonId, callback);
+            //console.log("listPersonsById");
+            pool.query('SELECT * FROM' + _persons + ' WHERE ID = ?', PersonId, callback);
         },
         listRanks: function (callback) {
-            pool.query('SELECT * FROM personPageRank ', callback);
+            //console.log("listRanks");
+            pool.query('SELECT * FROM ' + _personPageRank, callback);
         },
-        // SELECT * FROM nomenclature INNER JOIN description using(id);
         listRanksBySiteId: function (pageId, callback) {
-            pool.query('SELECT ID, Name, Rank FROM personPageRank, persons WHERE personPageRank.PersonID=persons.ID AND PageID=?', pageId, callback); //WHERE PageID = pageId   INNER JOIN persons
+            //console.log("listRanksBySiteId");
+            pool.query('SELECT * FROM ' + _personPageRank + ',' + _persons + ' WHERE ' + _personPageRank + '.' + _personId + ' = ' + _persons + '.ID AND ' + _pageId + ' = ?', pageId, callback); //ID, Name, Rank
         },
-        findPageStatFromTo: function (personId, siteId, fromTime, toTime, callback) { //not tested
-            pool.query('SELECT * FROM pages WHERE SiteID = ? AND foundDate BETWEEN ? AND ?', [siteId, fromTime, toTime],  callback);
+        findPageStatFromTo: function (personId, siteId, fromTime, toTime, callback) {
+            //console.log("findPageStatFromTo");
+            pool.query('SELECT ' + _foundDate + ', ' + _siteId + ' FROM ' + _pages + ' WHERE ' + _siteId + ' = ? AND ' + _foundDate + ' BETWEEN ? AND ?', [siteId, fromTime, toTime],  callback);
         }
     }
 };

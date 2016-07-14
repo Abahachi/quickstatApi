@@ -2,7 +2,7 @@ var util        = require('util');
 var restify     = require('restify');
 var mysql       = require('mysql');
 var config      = require('./config.js')
-var pool        = mysql.createPool(config.mysql);
+var pool        = mysql.createPool(config.mysql_1gbru);
 var operations  = require('./operations.js')(pool);
 
 rest = restify.createServer({
@@ -41,7 +41,7 @@ rest.get('/', function (req, res){
 rest.get('/v1/sites', function (req, res){
     operations.listSites(function (err, response){
         if(err) {
-            res.send(404, "listSites not found");
+            res.send(404, err);
         }
         res.send(200, response);
     });
@@ -50,7 +50,7 @@ rest.get('/v1/sites', function (req, res){
 rest.get('/v1/persons', function (req, res){
     operations.listPersons(function (err, response){
         if(err) {
-            res.send(404, "listPersons not found");
+            res.send(404, err);
         }
         res.send(200, response);
     });
@@ -59,7 +59,7 @@ rest.get('/v1/persons', function (req, res){
 rest.get('/v1/persons/:id', function (req, res){
     operations.listPersonsById(req.params.id, function (err,  response){
         if(err) {
-            res.send(404, "listPersonsById not found");
+            res.send(404, err);
         }
         res.send(200, response);
     });
@@ -70,7 +70,7 @@ rest.get('/v1/stats', function (req, res){
         operations.listRanksBySiteId(req.query.site_id, function (err, response)
         {
             if (err) {
-                res.send(404,err);
+                res.send(404, err);
             }
             res.send(200,  response);
         });
@@ -78,7 +78,7 @@ rest.get('/v1/stats', function (req, res){
         operations.listRanks(function (err, response)
         {
             if (err) {
-                res.send(404, "listRanks not found");
+                res.send(404, err);
             }
             res.send(200, response);
         });
@@ -105,7 +105,6 @@ rest.get('/v1/stats/:id', function (req, res){
             }
             res.send(200, response);
         });
-       // res.send(404, {result: "problem occured"});
     }
 });
 
