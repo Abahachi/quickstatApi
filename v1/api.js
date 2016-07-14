@@ -15,6 +15,7 @@ rest.use(restify.bodyParser()); //post parser
 rest.use(restify.gzipResponse()); //auto zip
 
 rest.use(function(req, res, next) {
+    var auth = req.authorization;
     if (req.path().indexOf('/protected' != -1)){  //check auth for all requests with 'v1'
         var auth = req.authorization;
 
@@ -34,47 +35,55 @@ rest.use(function(req, res, next) {
 });
 
 rest.get('/', function (req, res){
-    res.send(200, {result: "OK"});
+    res.send(200, "OK");
 });
 
 rest.get('/v1/sites', function (req, res){
-
-    //MySQL parsing
     operations.listSites(function (err, response){
         if(err) {
-            res.send(404, {result: "Sites not found"});
+            res.send(404, "listSites not found");
         }
-        res.send(200, {result: response});
+        res.send(200, response);
     });
 });
 
 rest.get('/v1/persons', function (req, res){
     operations.listPersons(function (err, response){
         if(err) {
-            res.send(404, {result: "Persons not found"});
+            res.send(404, "listPersons not found");
         }
-        res.send(200, {result: response});
+        res.send(200, response);
     });
 });
 
-/*
- 1. Запросить общую статистику для всех персон по сайту:
- /v1/stats?site_id=1
-
- [
- {"id":1, "name":"Путин", "rank":23},
- {"id":2, "name":"Медведев", "rank":18},
- {"id":3, "name":"Навальный", "rank":10}
- ]
-*/
-rest.get('/v1/stats', function (req, res){
-    operations.listRanksBySiteId(req.query.site_id, function (err, response)
-    {
-        if (err) {
-            res.send(404, {result: "Ranks not found"});
+rest.get('/v1/persons/:id', function (req, res){
+    operations.listPersonsById(req.params.id, function (err,  response){
+        if(err) {
+            res.send(404, "listPersonsById not found");
         }
-        res.send(200, {result: response});
+        res.send(200, response);
     });
+});
+
+rest.get('/v1/stats', function (req, res){
+    if( req.query.site_id ){
+        operations.listRanksBySiteId(req.query.site_id, function (err, response)
+        {
+            if (err) {
+                res.send(404,err);
+            }
+            res.send(200,  response);
+        });
+    } else {
+        operations.listRanks(function (err, response)
+        {
+            if (err) {
+                res.send(404, "listRanks not found");
+            }
+            res.send(200, response);
+        });
+
+    }
 });
 
 rest.get('/v1/stats/:id', function (req, res){
@@ -83,18 +92,26 @@ rest.get('/v1/stats/:id', function (req, res){
         operations.findPageStatFromTo(req.params.id, req.query.site_id, req.query.first_date, req.query.last_date,
             function (err, response) {
                 if (err) {
-                    res.send(404, {result: "Ranks not found"});
+                    res.send(404, err);
                 }
-                res.send(200, {result: response});
+                res.send(200, response);
             }
         );
     } else {
-        res.send(404, {result: "problem occured"});
+        operations.listRanksBySiteId(req.params.id, function (err, response)
+        {
+            if (err) {
+                res.send(404, err);
+            }
+            res.send(200, response);
+        });
+       // res.send(404, {result: "problem occured"});
     }
 });
 
 
 
-rest.listen(8080, function(){
+rest.listen(8081, function(){
     console.log('API launched');
+
 });
