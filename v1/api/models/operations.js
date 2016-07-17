@@ -46,6 +46,11 @@ var operations = function (pool) {
         findPageStatFromTo: function (personId, siteId, fromTime, toTime, callback) {
             //console.log("findPageStatFromTo");
             pool.query('SELECT ' + _foundDate + ', ' + _siteId + ' FROM ' + _pages + ' WHERE ' + _siteId + ' = ? AND ' + _foundDate + ' BETWEEN ? AND ?', [siteId, fromTime, toTime],  callback);
+        },
+
+
+        findUser: function (username, callback){
+            pool.query('SELECT username, password FROM users');
         }
     }
 };

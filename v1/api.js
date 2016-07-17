@@ -1,42 +1,54 @@
 var util        = require('util');
 var restify     = require('restify');
 var mysql       = require('mysql');
-var config      = require('./config.js')
-var pool        = mysql.createPool(config.mysql_1gbru);
-var operations  = require('./operations.js')(pool);
+var config      = require('./api/models/config.js')
+var pool        = mysql.createPool(config.mysql_localhost);
+var operations  = require('./api/models/operations.js')(pool);
+
 
 rest = restify.createServer({
     name: 'QuickStat'
 });
+
+var passport    = require('./api/models/auth.js')(rest);
 
 rest.use(restify.authorizationParser()); //auto pars of log&pass
 rest.use(restify.queryParser()); //get response parser
 rest.use(restify.bodyParser()); //post parser
 rest.use(restify.gzipResponse()); //auto zip
 
-rest.use(function(req, res, next) {
-    var auth = req.authorization;
-    if (req.path().indexOf('/protected' != -1)){  //check auth for all requests with 'v1'
-        var auth = req.authorization;
-
-        if(auth.scheme == null){
-            res.header('WWW-Authenticate', 'Basic realm="Please login"');
-            return res.send(401);
-
-            console.log('login:'    + auth.basic.username);
-            console.log('password:' + auth.basic.password);
-            //check if right log+pass.
-            //Return if not
-            return next();
-        }
-    }
-
-    return next();
-});
+//rest.use(function(req, res, next) {
+//    var auth = req.authorization;
+//    if (req.path().indexOf('/' != -1)){  //check auth for all requests with 'v1'
+//        console.log('login:'    + auth.basic.username);
+//        console.log('password:' + auth.basic.password);
+//        var auth = req.authorization;
+//
+//        if(auth.scheme == null){
+//            res.header('WWW-Authenticate', 'Basic realm="Please login"');
+//            return res.send(401);
+//
+//            console.log('login:'    + auth.basic.username);
+//            console.log('password:' + auth.basic.password);
+//            //check if right log+pass.
+//            //Return if not
+//            return next();
+//        }
+//    }
+//
+//    return next();
+//});
 
 rest.get('/', function (req, res){
     res.send(200, "OK");
+    //console.log('login:'    + auth.basic.username);
+    //console.log('password:' + auth.basic.password);
 });
+
+//rest.get('/login', function (req, res){
+//    passport
+//});
+
 
 rest.get('/v1/sites', function (req, res){
     operations.listSites(function (err, response){
