@@ -45,9 +45,7 @@ rest.get('/', function (req, res){
     //console.log('password:' + auth.basic.password);
 });
 
-//rest.get('/login', function (req, res){
-//    passport
-//});
+
 
 
 rest.get('/v1/sites', function (req, res){
