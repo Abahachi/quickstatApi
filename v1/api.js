@@ -10,7 +10,7 @@ rest = restify.createServer({
     name: 'QuickStat'
 });
 
-var passport    = require('./api/models/auth.js')(rest);
+var passport    = require('./api/models/auth.js');
 
 rest.use(restify.authorizationParser()); //auto pars of log&pass
 rest.use(restify.queryParser()); //get response parser

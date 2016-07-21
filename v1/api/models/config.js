@@ -11,6 +11,15 @@ var config = {
         user:       'gb_tstcrawler',
         password:   '6zac85cfajk',
         insecureAuth: true
+    },
+    mysql_quickstat:{
+        host:       '104.155.103.243',
+        path:       '/pma',
+        //port:       '3306',
+        database:   'quickstat',
+        user:       'gb_tstcrawler',
+        password:   '6zac85cfajk'
+        //insecureAuth: true
     }
 };
 

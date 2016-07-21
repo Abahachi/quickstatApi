@@ -19,7 +19,18 @@ if(sqlServer == "localhost"){
     var _personPageRank = "personPageRank";
     var _foundDate      = "FoundDate";
   }
+if(sqlServer == "quickstat"){
+    var _sites          = "sites";
+    var _siteId         = "site_id";
+    var _foundDate      = "found_date_time";
+    var _persons        = "persons";
+    var _personId       = "user_id";
+    var _personName     = "name";
+    var _pages          = "pages";
+    var _pageId         = "page_id";
+    var _personPageRank = "person_page_rank";
 
+}
 
 var operations = function (pool) {
     return {
@@ -50,7 +61,11 @@ var operations = function (pool) {
 
 
         findUser: function (username, callback){
-            pool.query('SELECT username, password FROM users');
+            pool.query('SELECT username,password FROM users WHERE users.username=?' , username, callback);
+        },
+
+        addUser: function(username, password, token, privileges, callback){
+            pool.query('INSERT INTO users (username, password, token, privileges) VALUES ("' + username + '", "' + password + '", "' + token + '", "' + privileges + '")', callback) ;
         }
     }
 };
