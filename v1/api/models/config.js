@@ -13,14 +13,16 @@ var config = {
         insecureAuth: true
     },
     mysql_quickstat:{
-        host:       '104.155.103.243',
-        path:       '/pma',
+        host:       'quickstat.cf',
+        //path:       'pma',
         //port:       '3306',
         database:   'quickstat',
         user:       'gb_tstcrawler',
-        password:   '6zac85cfajk'
+        password:   '6zac85cfajk',
+        debug:      true
         //insecureAuth: true
     }
 };
+
 
 module.exports = config;

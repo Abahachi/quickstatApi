@@ -4,7 +4,7 @@ var randtoken   = require('rand-token');
 
 var mysql       = require('mysql');
 var config      = require('./config.js');
-var pool        = mysql.createPool(config.mysql_localhost);
+var pool        = mysql.createPool(config.mysql_quickstat);
 
 
 var crypto = require('crypto'),
@@ -102,7 +102,7 @@ var authentication =  passport.authenticate('local',
         failureMessage: "Invalid username or password"
     });
 var regUser = passport.authenticate('local-signup', {
-        successRedirect: '/register',
+        successRedirect: '/registred',
         failureRedirect: '/register',
         failureFlash : true
 });
@@ -124,11 +124,16 @@ rest.get('/user', function(req, res){
 rest.get('/login', function(req, res){
     res.send(200, 'Please, login');
 });
-rest.get('/logged', function(req, res){
-    res.send(200, 'You were logged as ' + req.username);
-});
 rest.get('/register', function(req, res){
-    res.send(200, 'Register to get access' +  req.username);
+    res.send(200, 'Registeration page');
+});
+
+
+rest.get('/logged', function(req, res){
+    res.send(200, 'You were logged as ');
+});
+rest.get('/registred', function(req, res){
+    res.send(200, 'Registred to get access');
 });
 
 rest.get('/logout', function(req, res){

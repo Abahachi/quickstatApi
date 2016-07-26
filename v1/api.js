@@ -2,7 +2,7 @@ var util        = require('util');
 var restify     = require('restify');
 var mysql       = require('mysql');
 var config      = require('./api/models/config.js')
-var pool        = mysql.createPool(config.mysql_localhost);
+var pool        = mysql.createPool(config.mysql_quickstat);//do not forget to update this on AUTH page
 var operations  = require('./api/models/operations.js')(pool);
 
 

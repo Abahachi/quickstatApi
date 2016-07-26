@@ -1,4 +1,4 @@
-var sqlServer = "localhost";
+var sqlServer = "quickstat";
 if(sqlServer == "1gb.ru"){
     var _sites          = "test2_sites";
     var _siteId         = "site_id"; //SiteID
