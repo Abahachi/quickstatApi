@@ -1,14 +1,5 @@
-var sqlServer = "quickstat";
-if(sqlServer == "1gb.ru"){
-    var _sites          = "test2_sites";
-    var _siteId         = "site_id"; //SiteID
-    var _persons        = "test_persons";
-    var _personId       = "Person_id"; //PersonID
-    var _pages          = "test2_pages";
-    var _pageId         = "page_id"; //
-    var _personPageRank = "test_person_page_rank";
-    var _foundDate      = "added"; //FoundDate
-}
+var sqlServer = "localhost";
+
 if(sqlServer == "localhost"){
     var _sites          = "sites";
     var _siteId         = "SiteID";
@@ -32,30 +23,26 @@ if(sqlServer == "quickstat"){
 
 }
 
+
 var operations = function (pool) {
     return {
-        listSites: function (callback) {
-            //console.log("listSites");
+        getSites: function (callback) {
             pool.query('SELECT * FROM ' + _sites, callback);
         },
-        listPersons: function (callback) {
-            //console.log("listPersons");
+        getPersons: function (callback) {
             pool.query('SELECT * FROM ' + _persons, callback);
         },
-        listPersonsById: function (PersonId, callback) {
-            //console.log("listPersonsById");
+        getPersonsById: function (PersonId, callback) {
             pool.query('SELECT * FROM' + _persons + ' WHERE ID = ?', PersonId, callback);
         },
-        listRanks: function (callback) {
-            //console.log("listRanks");
+
+        getRanks: function (callback) {
             pool.query('SELECT * FROM ' + _personPageRank, callback);
         },
-        listRanksBySiteId: function (pageId, callback) {
-            //console.log("listRanksBySiteId");
+        getRanksBySiteId: function (pageId, callback) {
             pool.query('SELECT * FROM ' + _personPageRank + ',' + _persons + ' WHERE ' + _personPageRank + '.' + _personId + ' = ' + _persons + '.ID AND ' + _pageId + ' = ?', pageId, callback); //ID, Name, Rank
         },
         findPageStatFromTo: function (personId, siteId, fromTime, toTime, callback) {
-            //console.log("findPageStatFromTo");
             pool.query('SELECT ' + _foundDate + ', ' + _siteId + ' FROM ' + _pages + ' WHERE ' + _siteId + ' = ? AND ' + _foundDate + ' BETWEEN ? AND ?', [siteId, fromTime, toTime],  callback);
         },
 
