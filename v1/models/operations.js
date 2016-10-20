@@ -1,60 +1,117 @@
-var sqlServer = "localhost";
+module.exports = function(app){
+    var dbConfig = {
+        client: 'mysql',
+        connection: config.mysql_localhost
+    };
+    var bcrypt    = require('bcrypt-nodejs');
+    var knex      = require('knex')(dbConfig);
+    var bookshelf = require('bookshelf')(knex);
 
-if(sqlServer == "localhost"){
-    var _sites          = "sites";
-    var _siteId         = "SiteID";
-    var _persons        = "persons";
-    var _personId       = "PersonID";
-    var _pages          = "pages";
-    var _pageId         = "pageID";
-    var _personPageRank = "personPageRank";
-    var _foundDate      = "FoundDate";
-  }
-if(sqlServer == "quickstat"){
-    var _sites          = "sites";
-    var _siteId         = "site_id";
-    var _foundDate      = "found_date_time";
-    var _persons        = "persons";
-    var _personId       = "user_id";
-    var _personName     = "name";
-    var _pages          = "pages";
-    var _pageId         = "page_id";
-    var _personPageRank = "person_page_rank";
+    app.set('bookshelf', bookshelf);
 
-}
+    var Sites = bookshelf.Model.extend({
+        tableName: 'sites'
+    });
+    var Persons = bookshelf.Model.extend({
+        tableName: 'persons'
+    });
+    var Rank = bookshelf.Model.extend({
+        tableName: 'personpagerank'
+    });
+    var Pages = bookshelf.Model.extend({
+        tableName: 'pages'
+    });
+    var Users = bookshelf.Model.extend({
+        tableName: 'users'
+    });
 
-
-var operations = function (pool) {
     return {
-        getSites: function (callback) {
-            pool.query('SELECT * FROM ' + _sites, callback);
+        getPersons: function (req, res){
+             new Persons()
+                .fetchAll()
+                .then(function (persons) {
+                    res.send(persons.toJSON());
+                }).catch(function (error) {
+                    console.log(error);
+                    res.send('An error occured');
+                });
         },
-        getPersons: function (callback) {
-            pool.query('SELECT * FROM ' + _persons, callback);
+        getPersonsByID: function(req, res){
+             new Persons()
+                .where("ID", req.params.id)
+                .fetchAll()
+                .then(function (persons) {
+                    res.send(persons.toJSON());
+                }).catch(function (error) {
+                    console.log(error);
+                    res.send('An error occured');
+                });
         },
-        getPersonsById: function (PersonId, callback) {
-            pool.query('SELECT * FROM' + _persons + ' WHERE ID = ?', PersonId, callback);
+        getStats: function(req, res){
+             new Rank()
+                .fetchAll()
+                .then(function (rank) {
+                    res.send(rank.toJSON());
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    res.send('An error occured');
+                });
         },
-
-        getRanks: function (callback) {
-            pool.query('SELECT * FROM ' + _personPageRank, callback);
+        getStatsById: function(req, res){
+            if (req.query.first_date && req.query.last_date) {
+                new Pages()
+                    .query(function (qb){
+                        qb.where("FoundDate", '>=' , req.query.first_date)
+                        .orWhere("FoundDate", '<=' , req.query.last_date)
+                })
+                    .fetchAll()
+                    .then(function (stats) {
+                        //persons.whereBetween()
+                        res.send(stats.toJSON());
+                    }).catch(function (error) {
+                        console.log(error);
+                        res.send('An error occured');
+                    });
+            } else {
+                new Pages()
+                    .where("ID", req.params.id)
+                    .fetchAll()
+                    .then(function (stats) {
+                        res.send(stats.toJSON());
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        res.send('An error occured');
+                    });
+            }
         },
-        getRanksBySiteId: function (pageId, callback) {
-            pool.query('SELECT * FROM ' + _personPageRank + ',' + _persons + ' WHERE ' + _personPageRank + '.' + _personId + ' = ' + _persons + '.ID AND ' + _pageId + ' = ?', pageId, callback); //ID, Name, Rank
+        getUser: function(req, username, password, done){
+            new Users()
+                .where("username", username)
+                .fetch()
+                .then(function (user) {
+                    if(user && bcrypt.compareSync(password, user.get('password'))){
+                        //user = user
+                        return done(null, user, req.flash('message', 'logged as ' + username));
+                    }
+                    return done(null,false, req.flash('failureMessage', 'Bad username or password'));
+                }).catch(function (error) {
+                    return done(error);
+                });
         },
-        findPageStatFromTo: function (personId, siteId, fromTime, toTime, callback) {
-            pool.query('SELECT ' + _foundDate + ', ' + _siteId + ' FROM ' + _pages + ' WHERE ' + _siteId + ' = ? AND ' + _foundDate + ' BETWEEN ? AND ?', [siteId, fromTime, toTime],  callback);
-        },
-
-
-        findUser: function (username, callback){
-            pool.query('SELECT username,password FROM users WHERE users.username=?' , username, callback);
-        },
-
-        addUser: function(username, password, token, privileges, callback){
-            pool.query('INSERT INTO users (username, password, token, privileges) VALUES ("' + username + '", "' + password + '", "' + token + '", "' + privileges + '")', callback) ;
+        addUser: function(req, username, password, done){
+            var salt = bcrypt.genSaltSync(10);
+            var hash = bcrypt.hashSync(password, salt);
+            new Users({
+                "username": username,
+                "password": hash
+            }).save()
+                .then(function(newRow) {
+                    return done(null, true, req.flash('message', 'New user registred'));
+                }).catch(function(err) {
+                    return done(null, false, req.flash('failureMessage', 'User already exists'));
+                });
         }
     }
 };
-
-module.exports = operations;
