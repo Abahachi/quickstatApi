@@ -1,74 +1,75 @@
-module.exports = function(app){
-    var dbConfig = {
-        client: 'mysql',
-        connection: config.mysql_localhost
-    };
-    var bcrypt    = require('bcrypt-nodejs');
-    var knex      = require('knex')(dbConfig);
-    var bookshelf = require('bookshelf')(knex);
+var bcrypt    = require('bcrypt-nodejs');
+var knex      = require('knex')(config.mysql_localhost);
+var bookshelf = require('bookshelf')(knex);
 
-    app.set('bookshelf', bookshelf);
+var Sites = bookshelf.Model.extend({
+    tableName: 'sites'
+});
+var Persons = bookshelf.Model.extend({
+    tableName: 'persons'
+});
+var Rank = bookshelf.Model.extend({
+    tableName: 'personpagerank'
+});
+var Pages = bookshelf.Model.extend({
+    tableName: 'pages'
+});
+var Users = bookshelf.Model.extend({
+    tableName: 'users'
+});
 
-    var Sites = bookshelf.Model.extend({
-        tableName: 'sites'
-    });
-    var Persons = bookshelf.Model.extend({
-        tableName: 'persons'
-    });
-    var Rank = bookshelf.Model.extend({
-        tableName: 'personpagerank'
-    });
-    var Pages = bookshelf.Model.extend({
-        tableName: 'pages'
-    });
-    var Users = bookshelf.Model.extend({
-        tableName: 'users'
-    });
-
-    return {
-        getPersons: function (req, res){
-             new Persons()
-                .fetchAll()
-                .then(function (persons) {
-                    res.send(persons.toJSON());
+module.exports = {
+        getSites: function (res){
+            new Sites().fetchAll()
+                .then(function (sites) {
+                    res.status(200).json(sites);
                 }).catch(function (error) {
                     console.log(error);
                     res.send('An error occured');
                 });
+        },
+        getPersons: function (res){
+             new Persons()
+                 .fetchAll()
+                 .then(function (persons) {
+                     res.status(200).json(persons);
+                 }).catch(function (error) {
+                     console.log(error);
+                     res.send('An error occured');
+                 });
         },
         getPersonsByID: function(req, res){
              new Persons()
-                .where("ID", req.params.id)
-                .fetchAll()
-                .then(function (persons) {
-                    res.send(persons.toJSON());
-                }).catch(function (error) {
-                    console.log(error);
-                    res.send('An error occured');
-                });
+                 .where("ID", req.params.id)
+                 .fetchAll()
+                 .then(function (persons) {
+                     res.status(200).json(persons);
+                 }).catch(function (error) {
+                     console.log(error);
+                     res.status(200).json('An error occured');
+                 });
         },
-        getStats: function(req, res){
+        getStats: function(res){
              new Rank()
-                .fetchAll()
-                .then(function (rank) {
-                    res.send(rank.toJSON());
-                })
-                .catch(function (error) {
-                    console.log(error);
-                    res.send('An error occured');
-                });
+                 .fetchAll()
+                 .then(function (rank) {
+                     res.status(200).json(rank);
+                 })
+                 .catch(function (error) {
+                     console.log(error);
+                     res.send('An error occured');
+                 });
         },
         getStatsById: function(req, res){
             if (req.query.first_date && req.query.last_date) {
                 new Pages()
                     .query(function (qb){
                         qb.where("FoundDate", '>=' , req.query.first_date)
-                        .orWhere("FoundDate", '<=' , req.query.last_date)
+                        .where("FoundDate",   '<=' , req.query.last_date)
                 })
                     .fetchAll()
                     .then(function (stats) {
-                        //persons.whereBetween()
-                        res.send(stats.toJSON());
+                        res.status(200).json(stats);
                     }).catch(function (error) {
                         console.log(error);
                         res.send('An error occured');
@@ -78,7 +79,7 @@ module.exports = function(app){
                     .where("ID", req.params.id)
                     .fetchAll()
                     .then(function (stats) {
-                        res.send(stats.toJSON());
+                        res.status(200).json(stats);
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -92,7 +93,6 @@ module.exports = function(app){
                 .fetch()
                 .then(function (user) {
                     if(user && bcrypt.compareSync(password, user.get('password'))){
-                        //user = user
                         return done(null, user, req.flash('message', 'logged as ' + username));
                     }
                     return done(null,false, req.flash('failureMessage', 'Bad username or password'));
@@ -113,5 +113,4 @@ module.exports = function(app){
                     return done(null, false, req.flash('failureMessage', 'User already exists'));
                 });
         }
-    }
 };

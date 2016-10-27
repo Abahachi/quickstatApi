@@ -1,13 +1,9 @@
 module.exports = function (app, express) {
     var flash       = require('connect-flash');
         router      = express.Router();
-        db = require('../models/operations.js')(app);
+        db          = require('../models/operations.js');
 
-    var dbConfig = {
-        client: 'mysql',
-        connection: config.mysql_localhost
-    };
-    var knex = require('knex')(dbConfig);
+    var knex = require('knex')(config.mysql_localhost);
     var bookshelf = require('bookshelf')(knex);
 
     app.use(flash());
@@ -31,7 +27,6 @@ module.exports = function (app, express) {
     passport.deserializeUser(function(user, done){
         done(null, user);
     });
-
 
     var LocalStrategy = require('passport-local').Strategy;
     passport.use('local-login',new LocalStrategy({
@@ -78,24 +73,24 @@ module.exports = function (app, express) {
     app.post('/register', regUser);
 
     app.get('/login',  function (req, res) {
-        res.status(200).json('You have to login to get access!  ' + req.flash('failureMessage'));
+        res.status(200).json('You have to login to get access!');
     });
 
     app.get('/register', function (req, res) {
-        res.status(200).json('Registeration page ' + req.flash('failureMessage') );
+        res.status(200).json('Registeration page' );
     });
 
     app.get('/logged', function (req, res) {
-        res.status(200).json('You were logged as ' + req.flash('message'));
+        res.status(200).json(req.flash('message'));
     });
 
     app.get('/registred', function (req, res) {
-        res.status(200).json('Registred to get access' + req.flash('message'));
+        res.status(200).json(req.flash('message'));
     });
 
     app.get('/logout', function (req, res) {
         console.log("logout");
         req.logout();
-        res.redirect('/');
+        res.redirect('/login');
     });
 };

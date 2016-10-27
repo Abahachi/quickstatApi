@@ -1,16 +1,16 @@
-var express     = require('express');
-    app         = express();
-    router      = express.Router();
-    config      = require('./config.js');
-    port        = process.env.PORT || 8082;
-    bodyParser  = require('body-parser');
-    cookieParser= require('cookie-parser');
-
+var express      = require('express');
+    app          = express();
+    router       = express.Router();
+    config       = require('./config.js');
+    port         = process.env.PORT || 8082;
+    bodyParser   = require('body-parser');
+    cookieParser = require('cookie-parser');
 
 var allowCrossDomain = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     next();
 };
+
 app.use(allowCrossDomain);
 app.use(router);
 app.use(cookieParser());
