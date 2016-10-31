@@ -11,7 +11,7 @@ module.exports = function (app, express) {
         db.getPersons(res);
     });
 
-    app.get('/v1/persons/:id', function (req, res) {
+    app.get('/v1/persons/person_id=:id', function (req, res) {
         db.getPersonsByID(req, res);
     });
 
@@ -19,7 +19,7 @@ module.exports = function (app, express) {
         db.getStats(res);
     });
 
-    app.get('/v1/stats/:id', function (req, res) {
+    app.get('/v1/stats/site_id=:id', function (req, res) {
         db.getStatsById(req, res);
     });
 };
